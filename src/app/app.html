@@ -1,0 +1,107 @@
+<main class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">🎲</div>
+      <div>
+        <h1>LUDO CLUB</h1>
+        <p class="eyebrow">A little luck. A lot of fun.</p>
+      </div>
+    </div>
+    <div class="header-badge">4 players · local game</div>
+  </header>
+
+  <section class="game-layout" aria-label="Ludo game">
+    <div class="board-frame">
+      <div class="board-label">The board</div>
+      <div #board class="board" aria-label="Interactive 3D Ludo board"></div>
+      <div class="board-tip">Drag to orbit · scroll to zoom</div>
+    </div>
+
+    <aside class="sidebar">
+      <section class="turn-card" aria-live="polite">
+        <p class="section-title">Current turn</p>
+        <div class="turn-heading">
+          <span
+            class="turn-dot"
+            [style.background]="currentPlayer().cssColor"
+            [style.color]="currentPlayer().cssColor"
+          ></span>
+          <span class="turn-name">
+            {{ gameOver() ? currentPlayer().name + ' wins!' : currentPlayer().name + "'s turn" }}
+          </span>
+        </div>
+        <p class="status" data-testid="game-status">{{ statusText() }}</p>
+      </section>
+
+      <section class="turn-card">
+        <p class="section-title">Your move</p>
+        <div class="dice-area">
+          <button
+            #rollButton
+            class="dice-button"
+            [class.rolling]="busy() && diceValue() === null"
+            [disabled]="!canRoll()"
+            type="button"
+            aria-label="Roll dice"
+            title="Roll dice"
+            (click)="rollDice()"
+          >{{ diceFace() }}</button>
+          <div class="dice-copy" aria-live="polite">
+            <strong data-testid="dice-title">{{ diceTitle() }}</strong>
+            <span>{{ diceHint() }}</span>
+          </div>
+        </div>
+        @if (movableTokens().length > 0) {
+          <div class="token-choices" aria-label="Available tokens">
+            <p>Or choose a token:</p>
+            @for (token of movableTokens(); track token.id) {
+              <button
+                type="button"
+                class="token-choice"
+                [style.--token-color]="players[token.playerIndex].cssColor"
+                [attr.aria-label]="tokenLabel(token)"
+                (click)="moveToken(token)"
+              >
+                <span class="choice-dot" aria-hidden="true"></span>
+                Token {{ token.tokenIndex + 1 }}
+              </button>
+            }
+          </div>
+        }
+      </section>
+
+      <section aria-label="Players">
+        <p class="section-title">Players</p>
+        <div class="players">
+          @for (player of players; track player.name; let playerIndex = $index) {
+            <div
+              class="player-row"
+              [class.active]="playerIndex === currentPlayerIndex()"
+              [attr.data-tokens-in-base]="baseCount(playerIndex)"
+            >
+              <span class="player-name-wrap">
+                <i class="player-swatch" [style.background]="player.cssColor"></i>
+                {{ player.name }}
+              </span>
+              <span class="token-count">{{ homeCount(playerIndex) }}/4 home</span>
+            </div>
+          }
+        </div>
+      </section>
+
+      <div class="rules">
+        <strong>How to play</strong>
+        <p>
+          Roll a 6 to leave base. Tap a glowing token or choose one here. Reach home
+          with an exact roll — and watch out for captures!
+        </p>
+      </div>
+      <button
+        class="reset-button"
+        type="button"
+        [disabled]="!canReset()"
+        (click)="resetGame()"
+      >↻ &nbsp; New game</button>
+    </aside>
+  </section>
+</main>
